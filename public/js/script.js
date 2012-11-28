@@ -98,9 +98,9 @@ $(function () {
     };
 
     function memText(data) {
-        infomemory.text((data.info.rss/1000000).toFixed(1));
-        sysmemory.text((data.sys.totalmem/1000000).toFixed());
-        freememory.text((data.sys.freemem/1000000).toFixed());
+        infomemory.text((data.info.rss/1048576).toFixed(1));
+        sysmemory.text((data.sys.totalmem/1048576).toFixed());
+        freememory.text((data.sys.freemem/1048576).toFixed());
     };
 
     function loadText(data) {
