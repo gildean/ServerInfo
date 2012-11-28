@@ -1,4 +1,4 @@
-InfoNode
+ServerInfo
 ========
 
-Http-server which displays information about the server and the machine running the server.
+Real-time server statistics via websockets.
