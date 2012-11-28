@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+    <head>
+        <title>ServerInfo</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="graph1" class="graph"></div>
+        <div id="websocket">Websocket:<span id="status"></span></div>
+        <h1 id="title">ServerInfo</h1><img id="logo" src="apple-touch-icon.png" />
+        <p id="nodeversion" class="detail">Node.js <span id="version">v0.0.0</span></p>
+        <div id="main">
+            <h3><span class="detail">Running on: </span><span id="system">Unknown system</span></h3>
+           <h3><span class="detail">ServerInfo uptime: </span><span id="infouptime">0.00</span></h3>
+            <h3><span class="detail">Server uptime: </span><span id="sysuptime">0.00</span></h3>
+            <h3><span class="detail">Memory usage: </span></h3>
+            <p><span class="memory">Server Total: </span><span id="sysmemory"></span><span class="mb"> MB</span></p>
+            <p><span class="memory">Server Free: </span><span id="freememory"></span><span class="mb"> MB</span></p>
+            <p><span class="memory">ServerInfo: </span><span id="infomemory"></span><span class="mb"> MB</span></p>
+        </div>
+        <div id="load">
+             <h3 class="detail">Server load avg: </h3>
+             <strong class="min1"> 1min: </strong><span id="load1">0.0000</span>
+             <strong class="min5"> 5min: </strong><span id="load2">0.0000</span>
+             <strong class="min15"> 15min: </strong><span id="load3">0.0000</span>
+        </div>
+        <script src="jquery.js"></script>
+        <script src="raphael.js"></script>
+        <script src="morris.js"></script>
+        <script src="moment.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
