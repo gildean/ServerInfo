@@ -17,7 +17,7 @@ var http = require('http'),
         }
     });
 
-
+// a function that returns an object with the new data in place
 var sysData = function () {
     return {
         type: info,
@@ -39,6 +39,7 @@ var sysData = function () {
     }
 };
 
+// function for sending to all connected clients
 function dataSend(data) {
     Object.keys(connections).forEach(function (id) {
         if (connections[id].connected) {
@@ -47,6 +48,7 @@ function dataSend(data) {
     });
 };
 
+// define the servers and start listening
 var app = http.createServer(function (request, response) {
     request.addListener('end', function () {
         fileServer.serve(request, response);
@@ -60,6 +62,7 @@ var wsapp = http.createServer(function (req, res) {
     console.log('-={( Server Ready! )}=-');
 });
 
+// the websocket-server logics
 var wss = new WebSocketServer({ httpServer: wsapp });
 
 wss.on('request', function (request) {
@@ -85,6 +88,7 @@ wss.on('request', function (request) {
 
 });
 
+// a function for setting the interval for new data to be sent
 (function sendInterval() {
     dataSend(JSON.stringify(sysData()));
     setTimeout(function () {
