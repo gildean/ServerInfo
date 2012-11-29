@@ -16,7 +16,7 @@ body {
     background: linear-gradient(135deg, #ffffff 0%,#f6f6f6 47%,#ededed 100%);
 	color: #2E3846;
 	text-shadow:-1px 1px 1px rgba(0,0,0,0.1);
-	font:127% 'Open Sans', sans-serif
+	font:126% 'Open Sans', sans-serif
 }
 
 #main {
@@ -27,10 +27,9 @@ body {
 	text-align:center;
     background: rgba(252,252,252,0.5);
     overflow: auto;
-    padding: 0 0.3em 0 0.5em;
+    padding: 0 0 0 0.5%;
     height: 100%;
-    width: 25%;
-    min-width: 300px;
+    width: 26%;
 }
 
 h1 {
@@ -152,22 +151,9 @@ h3 {
     color: tomato;
 }
 
-
-@media only screen
-and (max-width: 1280px) {
-
+@media only screen 
+and (min-width: 1280px) {
     body {
-        font-size:110%
+        font-size: 109%;
     }
-
-    #graph1 {
-        width: 75%;
-    }
-
-}
-
-
-@media only screen
-and (min-width: 1400px) {
-    
 }

@@ -17,22 +17,29 @@ $(function () {
         load3 = $('#load3'),
         now = Date.now() - 370000,
         tmparr = [],
-        sends = 1,
-        rising = false,
-        lastload = [0,0,0],
         b = 0.15,
         c = 0.125,
         d = 0.1,
+        oncearr = [b,c,d],
         connection, p, m;
-    
-    for (p = 0; p < 72; p += 1) {
-        m = (now += 5000);
-        tmparr.push({y:m,a:b,b:c,c:d});
+
+    (function () {
+        for (p = 0; p < 72; p += 1) {
+            m = (now += 5000);
+            tmparr.push({y:m,a:b,b:c,c:d});
+        };
+    }());
+
+    function drawArr(data) {
+        tmparr.shift();
+        tmparr.push({y:Date.now(), a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
+        var retarr = tmparr;
+        return retarr;
     };
-    
+
     var graph = Morris.Line({
         element: 'graph1',
-        data: tmparr,
+        data: drawArr(oncearr),
         xkey: 'y',
         ykeys: ['a', 'b', 'c'],
         labels: ['1min', '5min', '15min'],
@@ -40,56 +47,42 @@ $(function () {
         hideHover: true
     });
 
+    function wsFail() {
+        connection = {};
+        status.text('failed');
+        $('#main').animate({opacity: 0}, 5000);
+        $('#graph1').animate({opacity: 0}, 5000);
+        version.animate({opacity: 0}, 5000);
+        title.animate({opacity: 0}, 20000);
+    };
+
     if (window.WebSocket) {   
         connection = new WebSocket('ws://localhost:20500/');
         status.text('connected');
     } else {
-        connection = {};
-        status.text('failed');
-        $('#main').animate({opacity: 0}, 5000);
-        version.animate({opacity: 0}, 5000);
-        title.animate({opacity: 0}, 20000);
+        wsFail();
     }
 
     function isValidJSON(message) {
         try {
             return JSON.parse(message);
         } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message);
+            console.log('This doesn\'t look like valid JSON: ' + message);
             return false;
         }
     };
 
     function addVersion(data) {
         version.fadeOut(300, function () {
-            $(this).text(data.info).fadeIn(300);
+            version.text(data.info).fadeIn(300);
         });
         system.fadeOut(300, function () {
-            $(this).text(data.sys).fadeIn(300);
+            system.text(data.sys).fadeIn(300);
         });
     };
 
     function drawLine(data) {
-        var i;
-        tmparr.splice(0, 1);
-        /*if (sends%2 === 0) {
-            for (i = 0; i < data.length; i += 1) {
-                if (rising) {
-                    data[i] = data[i] * 103 / 100;
-                } else {
-                    data[i] = data[i] * 95 / 100;
-                }
-            };
-            if (data[0] > lastload[0]) {
-                rising = true;
-            } else {
-                rising = false;
-            }
-        }
-        sends += 1;
-        lastload = data;*/
-        tmparr.push({y:Date.now(), a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
-        graph.setData(tmparr);
+        graph.setData(drawArr(data));
     };
 
     function uptime(data) {
@@ -146,7 +139,7 @@ $(function () {
     };
     
     connection.onerror = function (error) {
-        $('#main').html($('<h1>', { text: 'Error' } ));
+        $('body').html($('<h1>', { text: 'Error' } ));
     };
 
     connection.onmessage = function (message) {
@@ -157,5 +150,11 @@ $(function () {
             addVersion(json.data);
         } 
     };
+
+    setInterval(function () {
+        if (connection.readyState !== 1) {
+            wsFail();
+        }
+    }, 2550);
 
 });
