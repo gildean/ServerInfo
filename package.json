@@ -15,8 +15,8 @@
     "url": "https://github.com/gildean/ServerInfo.git"
   },
   "keywords": [
-    "cli",
-    "http",
+    "statistics",
+    "websocket",
     "server"
   ],
   "dependencies" : {
@@ -25,6 +25,6 @@
   }, 
   "license": "MIT",
   "engines": {
-    "node": ">=0.8"
+    "node": ">=0.6"
   }
 }
