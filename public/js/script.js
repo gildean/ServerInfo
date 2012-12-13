@@ -1,7 +1,6 @@
 $(function () {
     "use strict";
     // no point in going on if the browser sucks
-    window.WebSocket = window.WebSocket || window.MozWebSocket || false;
     
     var status = $('#status'),
         title = $('#title'),
@@ -15,20 +14,19 @@ $(function () {
         load1 = $('#load1'),
         load2 = $('#load2'),
         load3 = $('#load3'),
-        now = Date.now() - 370000,
+        now = Date.now() - 365100,
+        time = now,
         tmparr = [],
-        b = 0.15,
-        c = 0.125,
-        d = 0.1,
+        b = 10,
+        c = 5,
+        d = 0,
         oncearr = [b,c,d],
         connection, p, m;
 
-    (function () {
-        for (p = 0; p < 72; p += 1) {
-            m = (now += 5000);
-            tmparr.push({y:m,a:b,b:c,c:d});
-        };
-    }());
+    for (var i = 0; i < 72; i += 1) {
+       tmparr.push({y:time += 5100, a: b, b: c, c: d});
+    }; 
+
 
     function drawArr(data) {
         tmparr.shift();
@@ -41,6 +39,7 @@ $(function () {
         element: 'graph1',
         data: drawArr(oncearr),
         xkey: 'y',
+        xLabels: "30sec",
         ykeys: ['a', 'b', 'c'],
         labels: ['1min', '5min', '15min'],
         lineColors: ['DodgerBlue', 'gold', 'tomato'],
@@ -53,15 +52,17 @@ $(function () {
         $('#main').animate({opacity: 0}, 5000);
         $('#graph1').animate({opacity: 0}, 5000);
         version.animate({opacity: 0}, 5000);
-        title.animate({opacity: 0}, 20000);
     };
 
-    if (window.WebSocket) {   
-        connection = new WebSocket('ws://localhost:20500/');
-        status.text('connected');
-    } else {
-        wsFail();
-    }
+   function checkWs() {
+	if (window.WebSocket) {   
+	    connection = new WebSocket('ws://localhost:20500/');
+	    status.text('connected');
+	} else {
+	    wsFail();
+	}
+    };
+    checkWs();
 
     function isValidJSON(message) {
         try {
@@ -142,19 +143,33 @@ $(function () {
         $('body').html($('<h1>', { text: 'Error' } ));
     };
 
+    connection.onclose = function () {
+        checkWs();
+    };
+
     connection.onmessage = function (message) {
-        var json = isValidJSON(message.data);
+        var json = isValidJSON(message.data),
+            arr;
         if (json && json.type === 'INFO') {
             refreshInfo(json.data);
         } else if (json && json.type === 'VERSION') {
             addVersion(json.data);
-        } 
+        } else if (json && json.type === 'HISTORY') {
+            Object.keys(json.data).forEach(function (key) {
+                m = (now += 5100);
+                var data = json.data[key];
+                tmparr.shift();
+                tmparr.push({y:m,a:data.load[0].toFixed(3),b:data.load[1].toFixed(3),c:data.load[2].toFixed(3)});
+                arr = tmparr;
+            });
+            graph.setData(arr);
+        }              
     };
 
     setInterval(function () {
-        if (connection.readyState !== 1) {
-            wsFail();
-        }
-    }, 2550);
+        if (connection && !(connection.readyState !== 1 || connection.readyState !== 0)) {
+            connection.close();
+        }        
+    }, 5000);
 
 });

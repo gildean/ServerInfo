@@ -1,6 +1,6 @@
 var http = require('http'),
-    static = require('node-static'),
     os = require('os'),
+    static = require('node-static'),
     fileServer = new static.Server('./public'),
     WebSocketServer = require('websocket').server,
     connections = {},
@@ -15,7 +15,8 @@ var http = require('http'),
             info: processV,
             sys: sysStr,
         }
-    });
+    }),
+    history = [];
 
 // a function that returns an object with the new data in place
 var sysData = function () {
@@ -38,6 +39,15 @@ var sysData = function () {
         }
     }
 };
+
+// fill the history up first so we can start shifting it
+(function initHistory() {
+    var tempData = sysData().data,
+        i;
+    for (i = 0; i < 72; i += 1) {
+        history.push(tempData);
+    };
+}());
 
 // function for sending to all connected clients
 function dataSend(data) {
@@ -71,9 +81,11 @@ wss.on('request', function (request) {
         connections[connection.id] = connection;
     
     connection.on('message', function (message) {
+        var sending;
         if (message.utf8Data === version) {
+            sending = history;
             connection.send(vJson);
-            connection.send(JSON.stringify(sysData()));
+            connection.send(JSON.stringify({ type: "HISTORY", data: sending }));
         } else {
             message = null;
         }
@@ -90,7 +102,10 @@ wss.on('request', function (request) {
 
 // a function for setting the interval for new data to be sent
 (function sendInterval() {
-    dataSend(JSON.stringify(sysData()));
+    var sendData = sysData();
+    history.shift();
+    history.push(sendData.data);
+    dataSend(JSON.stringify(sendData));
     setTimeout(function () {
         sendInterval()
     }, 5000);
