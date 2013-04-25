@@ -5,11 +5,10 @@ Real-time server statistics via websockets.
 
 Usage
 -----
-You may want to change the used ports in `server.js` and the corresponding client port in `public/js/script.js`
+Install from npm ```npm install serverinfo -g```
 
-```
-git clone https://github.com/gildean/ServerInfo && cd ServerInfo && npm install && node server
-```
+Start with ```serverinfo [port]``` If the port is omitted, then port 20000 is used.
+
 Demo
 ----
 A live demo can be found at [http://serverinfo.nodester.com](http://serverinfo.nodester.com)

@@ -1,15 +1,19 @@
 {
-  "name": "ServerInfo",
-  "version": "0.0.2",
+  "name": "serverinfo",
+  "version": "0.1.0",
   "author": "Olli K <olli@salaliitto.com>",
   "description": "Real-time server statistics via websockets.",
-  "contributors": [ 
+  "contributors": [
     {
       "name": "Olli K",
       "email": "olli@salaliitto.com"
-    } 
+    }
   ],
-  "main": "server.js",
+  "preferGlobal": "true",
+  "main": "./serverinfo",
+  "bin": {
+    "serverinfo": "./serverinfo"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/gildean/ServerInfo.git"
@@ -19,12 +23,12 @@
     "websocket",
     "server"
   ],
-  "dependencies" : {
-    "node-static"   :  "0.6.x",
-    "websocket" :  "1.x.x"
-  }, 
+  "dependencies": {
+    "ws": "~0.4.25",
+    "connect": "~2.7.6"
+  },
   "license": "MIT",
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.8"
   }
 }

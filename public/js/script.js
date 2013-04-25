@@ -21,7 +21,7 @@ $(function () {
         c = 5,
         d = 0,
         oncearr = [b,c,d],
-        connection, p, m;
+        connection, p, m, avg1, avg5, avg15;
 
     for (var i = 0; i < 72; i += 1) {
        tmparr.push({y:time += 5100, a: b, b: c, c: d});
@@ -56,7 +56,7 @@ $(function () {
 
    function checkWs() {
 	if (window.WebSocket) {   
-	    connection = new WebSocket('ws://localhost:20500/');
+	    connection = new WebSocket(window.location.href.replace('http', 'ws'));
 	    status.text('connected');
 	} else {
 	    wsFail();
@@ -80,6 +80,9 @@ $(function () {
         system.fadeOut(300, function () {
             system.text(data.sys).fadeIn(300);
         });
+        avg1 = (data.cpus / 5).toFixed(2);
+        avg5 = (data.cpus / 2).toFixed(2);
+        avg15 = (data.cpus / 1.05).toFixed(2);;
     };
 
     function drawLine(data) {
@@ -104,7 +107,7 @@ $(function () {
     };
 
     function titleColor(load) {
-        if (load < 1) {
+        if (load < avg1) {
             if (!title.hasClass('min1')) {
                 title.toggleClass('min1');
             }
@@ -114,12 +117,12 @@ $(function () {
             if (title.hasClass('min15')) {
                 title.toggleClass('min15');
             }
-        } else if (load >= 5 && !title.hasClass('min15')) {
+        } else if (load >= avg15 && !title.hasClass('min15')) {
             title.toggleClass('min15');
             if (title.hasClass('min5')) {
                 title.toggleClass('min5');
             }
-        } else if (load >= 1 && load < 5 && !title.hasClass('min5')) {
+        } else if (load >= avg5 && load < avg15 && !title.hasClass('min5')) {
             title.toggleClass('min5');
             if (title.hasClass('min15')) {
                 title.toggleClass('min15');
@@ -167,7 +170,7 @@ $(function () {
     };
 
     setInterval(function () {
-        if (connection && !(connection.readyState !== 1 || connection.readyState !== 0)) {
+        if (connection && connection.readyState > 1) {
             connection.close();
         }        
     }, 5000);
