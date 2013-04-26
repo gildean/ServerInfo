@@ -21,7 +21,7 @@ var http = require('http'),
             cpus: cpus
         }
     }),
-    history = [];
+    graphHistory = [];
 
 // a function that returns an object with the new data in place
 var sysData = function () {
@@ -33,7 +33,7 @@ var sysData = function () {
                 sys: {
                     freemem: os.freemem(),
                     totalmem: os.totalmem()
-                }   
+                }
 
             },
             uptime: {
@@ -42,7 +42,7 @@ var sysData = function () {
             },
             load: os.loadavg()
         }
-    }
+    };
 };
 
 // fill the history up first so we can start shifting it
@@ -50,8 +50,8 @@ var sysData = function () {
     var tempData = sysData().data,
         i;
     for (i = 0; i < 72; i += 1) {
-        history.push(tempData);
-    };
+        graphHistory.push(tempData);
+    }
 }());
 
 // function for sending to all connected clients
@@ -61,7 +61,7 @@ function dataSend(data) {
             connections[id].send(data);
         }
     });
-};
+}
 
 // define the server and start listening
 app.use(connect.static(__dirname + '/public'));
@@ -76,7 +76,7 @@ wss.on('connection', function (connection) {
     connection.on('message', function (message) {
         var sending;
         if (message === version) {
-            sending = history;
+            sending = graphHistory;
             connection.send(vJson);
             connection.send(JSON.stringify({ type: "HISTORY", data: sending }));
         } else {
@@ -95,10 +95,10 @@ wss.on('connection', function (connection) {
 // a function for setting the interval for new data to be sent
 (function sendInterval() {
     var sendData = sysData();
-    history.shift();
-    history.push(sendData.data);
+    graphHistory.shift();
+    graphHistory.push(sendData.data);
     dataSend(JSON.stringify(sendData));
     setTimeout(function () {
-        sendInterval()
+        sendInterval();
     }, 5000);
 }());

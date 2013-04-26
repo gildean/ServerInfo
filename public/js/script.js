@@ -25,7 +25,7 @@ $(function () {
 
     for (var i = 0; i < 72; i += 1) {
        tmparr.push({y:time += 5100, a: b, b: c, c: d});
-    }; 
+    }
 
 
     function drawArr(data) {
@@ -33,7 +33,7 @@ $(function () {
         tmparr.push({y:Date.now(), a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
         var retarr = tmparr;
         return retarr;
-    };
+    }
 
     var graph = Morris.Line({
         element: 'graph1',
@@ -52,16 +52,16 @@ $(function () {
         $('#main').animate({opacity: 0}, 5000);
         $('#graph1').animate({opacity: 0}, 5000);
         version.animate({opacity: 0}, 5000);
-    };
+    }
 
-   function checkWs() {
-	if (window.WebSocket) {   
-	    connection = new WebSocket(window.location.href.replace('http', 'ws'));
-	    status.text('connected');
-	} else {
-	    wsFail();
-	}
-    };
+    function checkWs() {
+        if (window.WebSocket) {
+            connection = new WebSocket(window.location.href.replace('http', 'ws'));
+            status.text('connected');
+        } else {
+            wsFail();
+        }
+    }
     checkWs();
 
     function isValidJSON(message) {
@@ -71,7 +71,7 @@ $(function () {
             console.log('This doesn\'t look like valid JSON: ' + message);
             return false;
         }
-    };
+    }
 
     function addVersion(data) {
         version.fadeOut(300, function () {
@@ -82,29 +82,29 @@ $(function () {
         });
         avg1 = (data.cpus / 5).toFixed(2);
         avg5 = (data.cpus / 2).toFixed(2);
-        avg15 = (data.cpus / 1.05).toFixed(2);;
-    };
+        avg15 = (data.cpus / 1.05).toFixed(2);
+    }
 
     function drawLine(data) {
         graph.setData(drawArr(data));
-    };
+    }
 
     function uptime(data) {
         infouptime.text(moment.humanizeDuration(data.info * 1000));
         sysuptime.text(moment.humanizeDuration(data.sys * 1000));
-    };
+    }
 
     function memText(data) {
         infomemory.text((data.info.rss/1048576).toFixed(1));
         sysmemory.text((data.sys.totalmem/1048576).toFixed());
         freememory.text((data.sys.freemem/1048576).toFixed());
-    };
+    }
 
     function loadText(data) {
         load1.text(data[0].toFixed(4));
         load2.text(data[1].toFixed(4));
         load3.text(data[2].toFixed(4));
-    };
+    }
 
     function titleColor(load) {
         if (load < avg1) {
@@ -128,7 +128,7 @@ $(function () {
                 title.toggleClass('min15');
             }
         }
-    };
+    }
     
     function refreshInfo(data) {
         drawLine(data.load);
@@ -136,7 +136,7 @@ $(function () {
         memText(data.memory);
         loadText(data.load);
         titleColor(parseInt(data.load[0].toFixed()));
-    };
+    }
 
     connection.onopen = function () {
         connection.send('VERSION');
@@ -166,13 +166,13 @@ $(function () {
                 arr = tmparr;
             });
             graph.setData(arr);
-        }              
+        }
     };
 
     setInterval(function () {
         if (connection && connection.readyState > 1) {
             connection.close();
-        }        
+        }
     }, 5000);
 
 });
