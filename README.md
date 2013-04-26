@@ -5,7 +5,7 @@ Real-time server statistics via websockets.
 
 Usage
 -----
-Install from npm ```npm install serverinfo -g```
+Install globally with ```npm install serverinfo -g```
 
 Start with ```serverinfo [port]``` If the port is omitted, then port 20000 is used.
 
