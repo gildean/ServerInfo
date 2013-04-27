@@ -1,6 +1,5 @@
 $(function () {
     "use strict";
-    // no point in going on if the browser sucks
     
     var status = $('#status'),
         title = $('#title'),
@@ -27,7 +26,6 @@ $(function () {
        tmparr.push({y:time += 5100, a: b, b: c, c: d});
     }
 
-
     function drawArr(data) {
         tmparr.shift();
         tmparr.push({y:Date.now(), a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
@@ -47,22 +45,24 @@ $(function () {
     });
 
     function wsFail() {
-        connection = {};
+        connection = null;
         status.text('failed');
         $('#main').animate({opacity: 0}, 5000);
         $('#graph1').animate({opacity: 0}, 5000);
         version.animate({opacity: 0}, 5000);
     }
 
-    function checkWs() {
+    (function checkWs() {
         if (window.WebSocket) {
-            connection = new WebSocket(window.location.href.replace('http', 'ws'));
-            status.text('connected');
-        } else {
+            if ((connection && connection.readyState > 1) || !connection) {
+                connection = new WebSocket(window.location.href.replace('http', 'ws'));
+                status.text('connected');
+            }
+            setTimeout(checkWs, 10000);
+        }  else {
             wsFail();
         }
-    }
-    checkWs();
+    }());
 
     function isValidJSON(message) {
         try {
@@ -168,11 +168,5 @@ $(function () {
             graph.setData(arr);
         }
     };
-
-    setInterval(function () {
-        if (connection && connection.readyState > 1) {
-            connection.close();
-        }
-    }, 5000);
 
 });
