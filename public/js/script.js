@@ -26,16 +26,16 @@ $(function () {
        tmparr.push({y:time += 5100, a: b, b: c, c: d});
     }
 
-    function drawArr(data) {
+    function drawArr(data, timeStamp) {
         tmparr.shift();
-        tmparr.push({y:Date.now(), a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
+        tmparr.push({y:timeStamp, a:data[0].toFixed(3), b:data[1].toFixed(3), c:data[2].toFixed(3)});
         var retarr = tmparr;
         return retarr;
     }
 
     var graph = Morris.Line({
         element: 'graph1',
-        data: drawArr(oncearr),
+        data: drawArr(oncearr, Date.now()),
         xkey: 'y',
         xLabels: "30sec",
         ykeys: ['a', 'b', 'c'],
@@ -52,7 +52,7 @@ $(function () {
         version.animate({opacity: 0}, 5000);
     }
 
-    (function checkWs() {
+    function checkWs() {
         if (window.WebSocket) {
             if ((connection && connection.readyState > 1) || !connection) {
                 connection = new WebSocket(window.location.href.replace('http', 'ws'));
@@ -62,7 +62,8 @@ $(function () {
         }  else {
             wsFail();
         }
-    }());
+    }
+    checkWs();
 
     function isValidJSON(message) {
         try {
@@ -85,8 +86,8 @@ $(function () {
         avg15 = (data.cpus / 1.05).toFixed(2);
     }
 
-    function drawLine(data) {
-        graph.setData(drawArr(data));
+    function drawLine(data, timeStamp) {
+        graph.setData(drawArr(data, timeStamp));
     }
 
     function uptime(data) {
@@ -117,21 +118,28 @@ $(function () {
             if (title.hasClass('min15')) {
                 title.toggleClass('min15');
             }
-        } else if (load >= avg15 && !title.hasClass('min15')) {
-            title.toggleClass('min15');
+        } else if (load >= avg15) {
+            if (!title.hasClass('min15')) {
+                title.toggleClass('min15');
+            }
             if (title.hasClass('min5')) {
                 title.toggleClass('min5');
             }
-        } else if (load >= avg5 && load < avg15 && !title.hasClass('min5')) {
-            title.toggleClass('min5');
+        } else if (load >= avg5 && load < avg15) {
+            if (!title.hasClass('min5')) {
+                title.toggleClass('min5');
+            }
             if (title.hasClass('min15')) {
                 title.toggleClass('min15');
+            }
+            if (title.hasClass('min1')) {
+                title.toggleClass('min1');
             }
         }
     }
     
     function refreshInfo(data) {
-        drawLine(data.load);
+        drawLine(data.load, data.time);
         uptime(data.uptime);
         memText(data.memory);
         loadText(data.load);
@@ -159,10 +167,9 @@ $(function () {
             addVersion(json.data);
         } else if (json && json.type === 'HISTORY') {
             Object.keys(json.data).forEach(function (key) {
-                m = (now += 5100);
                 var data = json.data[key];
                 tmparr.shift();
-                tmparr.push({y:m,a:data.load[0].toFixed(3),b:data.load[1].toFixed(3),c:data.load[2].toFixed(3)});
+                tmparr.push({y:data.time,a:data.load[0].toFixed(3),b:data.load[1].toFixed(3),c:data.load[2].toFixed(3)});
                 arr = tmparr;
             });
             graph.setData(arr);

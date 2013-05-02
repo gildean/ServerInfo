@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+
 "use strict";
+process.env.NODE_ENV = 'production';
 var http = require('http'),
     os = require('os'),
     connect = require('connect'),
@@ -40,7 +42,8 @@ var sysData = function () {
                 info: process.uptime(),
                 sys: os.uptime()
             },
-            load: os.loadavg()
+            load: os.loadavg(),
+            time: Date.now()
         }
     };
 };
@@ -49,8 +52,10 @@ var sysData = function () {
 (function initHistory() {
     var tempData = sysData().data,
         i;
+        tempData.time -= 360000;
     for (i = 0; i < 72; i += 1) {
-        graphHistory.push(tempData);
+        tempData.time += 5000;
+        graphHistory.push({ memory: tempData.memory, uptime: tempData.uptime, load: tempData.load, time: tempData.time });
     }
 }());
 
@@ -65,8 +70,10 @@ function dataSend(data) {
 
 // define the server and start listening
 var server = http.createServer(app).listen(PORT);
-app.use(connect.static(__dirname + '/public'));
-
+var month = 2592000000;
+app.use(connect.static(__dirname + '/public', { maxAge: month }));
+server.allowHalfOpen = false;
+server.on('error', function (err) { err = null; return; });
 // the websocket-server logics
 var wss = new WebSocketServer({ httpServer: server });
 
@@ -77,7 +84,7 @@ wss.on('request', function (request) {
     
     connection.on('message', function (message) {
         var sending;
-        if (message.utf8Data === version) {
+        if (message.type === 'utf8' && message.utf8Data === version) {
             sending = graphHistory;
             connection.send(vJson);
             connection.send(JSON.stringify({ type: "HISTORY", data: sending }));
@@ -86,7 +93,6 @@ wss.on('request', function (request) {
         }
     })
     .on('error', function (error) {
-        console.log(error);
         connection.close();
     })
     .on('close', function () {
