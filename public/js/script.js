@@ -4,6 +4,7 @@ $(function () {
     var status = $('#status'),
         title = $('#title'),
         version = $('#version'),
+        serverversion = $('#serverversion'),
         system = $('#system'),
         infomemory = $('#infomemory'),
         sysmemory = $('#sysmemory'),
@@ -75,6 +76,9 @@ $(function () {
     }
 
     function addVersion(data) {
+        serverversion.fadeOut(300, function () {
+            serverversion.text(data.server).fadeIn(300);
+        });
         version.fadeOut(300, function () {
             version.text(data.info).fadeIn(300);
         });
@@ -91,8 +95,8 @@ $(function () {
     }
 
     function uptime(data) {
-        infouptime.text(moment.humanizeDuration(data.info * 1000));
-        sysuptime.text(moment.humanizeDuration(data.sys * 1000));
+        infouptime.text(moment.duration(data.info * 1000).humanize());
+        sysuptime.text(moment.duration(data.sys * 1000).humanize());
     }
 
     function memText(data) {
