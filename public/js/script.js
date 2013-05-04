@@ -21,7 +21,7 @@ $(function () {
         c = 5,
         d = 0,
         oncearr = [b,c,d],
-        connection, p, m, avg1, avg5, avg15;
+        p, m, avg1, avg5, avg15;
 
     for (var i = 0; i < 72; i += 1) {
        tmparr.push({y:time += 5100, a: b, b: c, c: d});
@@ -45,26 +45,48 @@ $(function () {
         hideHover: true
     });
 
-    function wsFail() {
-        connection = null;
-        status.text('failed');
-        $('#main').animate({opacity: 0}, 5000);
-        $('#graph1').animate({opacity: 0}, 5000);
-        version.animate({opacity: 0}, 5000);
-    }
-
-    function checkWs() {
-        if (window.WebSocket) {
-            if ((connection && connection.readyState > 1) || !connection) {
-                connection = new WebSocket(window.location.href.replace('http', 'ws'));
+    var webSocketConnection = {
+        init: function () {
+            var self = this;
+            this.connection = new WebSocket(window.location.href.replace('http', 'ws'));
+            this.connection.onopen = function () {
                 status.text('connected');
-            }
-            setTimeout(checkWs, 10000);
-        }  else {
-            wsFail();
+                self.connection.send('VERSION');
+            };
+            
+            this.connection.onerror = function (error) {
+                $('body').html($('<h1>', { text: 'Error' } ));
+                self.connection.close();
+            };
+
+            this.connection.onclose = function () {
+                status.text('error');
+                self.init();
+            };
+
+            this.connection.onmessage = function (message) {
+                var json = isValidJSON(message.data),
+                    arr;
+                if (json && json.type === 'INFO') {
+                    refreshInfo(json.data);
+                } else if (json && json.type === 'VERSION') {
+                    addVersion(json.data);
+                } else if (json && json.type === 'HISTORY') {
+                    Object.keys(json.data).forEach(function (key) {
+                        var data = json.data[key];
+                        tmparr.shift();
+                        tmparr.push({y:data.time,a:data.load[0].toFixed(3),b:data.load[1].toFixed(3),c:data.load[2].toFixed(3)});
+                        arr = tmparr;
+                    });
+                    graph.setData(arr);
+                }
+            };
+        },
+        send: function (data) {
+            this.connection.send(data);
         }
-    }
-    checkWs();
+    };
+    webSocketConnection.init();
 
     function isValidJSON(message) {
         try {
@@ -149,35 +171,5 @@ $(function () {
         loadText(data.load);
         titleColor(parseInt(data.load[0].toFixed()));
     }
-
-    connection.onopen = function () {
-        connection.send('VERSION');
-    };
-    
-    connection.onerror = function (error) {
-        $('body').html($('<h1>', { text: 'Error' } ));
-    };
-
-    connection.onclose = function () {
-        checkWs();
-    };
-
-    connection.onmessage = function (message) {
-        var json = isValidJSON(message.data),
-            arr;
-        if (json && json.type === 'INFO') {
-            refreshInfo(json.data);
-        } else if (json && json.type === 'VERSION') {
-            addVersion(json.data);
-        } else if (json && json.type === 'HISTORY') {
-            Object.keys(json.data).forEach(function (key) {
-                var data = json.data[key];
-                tmparr.shift();
-                tmparr.push({y:data.time,a:data.load[0].toFixed(3),b:data.load[1].toFixed(3),c:data.load[2].toFixed(3)});
-                arr = tmparr;
-            });
-            graph.setData(arr);
-        }
-    };
 
 });

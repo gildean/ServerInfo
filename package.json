@@ -1,6 +1,6 @@
 {
   "name": "serverinfo",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Olli K <olli@salaliitto.com>",
   "description": "Real-time server statistics via websockets.",
   "contributors": [
